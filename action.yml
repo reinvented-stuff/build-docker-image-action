@@ -62,7 +62,7 @@ runs:
         fi
 
         GITHUB_IMAGE_ID="$(echo "${{ github.repository }}/${{ inputs.name }}" | tr '[A-Z]' '[a-z]')"
-        GITHUB_IMAGE_FULL_NAME="${GITHUB_IMAGE_ID}:${{ inputs.planned_version }}${long_suffix}"
+        GITHUB_IMAGE_FULL_NAME="ghcr.io/${GITHUB_IMAGE_ID}:${{ inputs.planned_version }}${long_suffix}"
 
         echo "::debug::GITHUB_IMAGE_ID: ${GITHUB_IMAGE_ID}"
         echo "::debug::GITHUB_IMAGE_FULL_NAME: ${GITHUB_IMAGE_FULL_NAME}"
@@ -76,7 +76,7 @@ runs:
       shell: bash
       run: >
         docker build
-        --tag "ghcr.io/${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
+        --tag "${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
         --build-arg BUILD_VERSION="${{ inputs.planned_version }}"
         --file Dockerfile
         .
@@ -86,7 +86,7 @@ runs:
       id: push_docker_image
       shell: bash
       run: |
-        docker push "ghcr.io/${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
+        docker push "${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
 
 
 ...

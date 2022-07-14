@@ -31,7 +31,7 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     outputs:
-      image_full_name: ${{ steps.validate_new_version.outputs.branch_name }}
+      image_full_name: ${{ steps.build_docker_image.outputs.image_full_name }}
 
     steps:
 
