@@ -1,0 +1,92 @@
+---
+# yamllint disable rule:line-length
+
+name: Build and push Docker image
+description: Builds a Docker image and pushes it into a registry
+
+
+inputs:
+  github_token:
+    description: 'Pass the secrets.GITHUB_TOKEN variable'
+    type: string
+    required: true
+
+  name:
+    description: 'Name of the Docker image'
+    type: string
+    required: true
+
+  planned_version:
+    description: 'Version to assign to the image'
+    type: string
+    required: true
+
+  fail_on_error:
+    description: 'Fail the pipeline on error'
+    type: boolean
+    default: false
+
+
+outputs:
+  image_full_name:
+    description: "Full name of the pushed image"
+    value: ${{ steps.set_docker_image_id.outputs.github_image_full_name }}
+
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Get trigger branch name
+      id: get_branch_name
+      shell: bash
+      run: |
+        echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+
+
+    - name: Login to Docker registry
+      id: docker_registry_login
+      shell: bash
+      run: |
+        echo "${{ inputs.github_token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+
+    - name: Define Docker image ID and full name
+      id: set_docker_image_id
+      shell: bash
+      run: |
+        if [[ "${{ steps.get_branch_name.outputs.branch_name }}" == "master" ]]; then
+          long_suffix=""
+        else
+          long_suffix="${{steps.get_branch_name.outputs.branch_name}}"
+        fi
+
+        GITHUB_IMAGE_ID="$(echo "${{ github.repository }}/${{ inputs.name }}" | tr '[A-Z]' '[a-z]')"
+        GITHUB_IMAGE_FULL_NAME="${GITHUB_IMAGE_ID}:${{ inputs.planned_version }}${long_suffix}"
+
+        echo "::debug::GITHUB_IMAGE_ID: ${GITHUB_IMAGE_ID}"
+        echo "::debug::GITHUB_IMAGE_FULL_NAME: ${GITHUB_IMAGE_FULL_NAME}"
+
+        echo "::set-output name=github_image_id::${GITHUB_IMAGE_ID}"
+        echo "::set-output name=github_image_full_name::${GITHUB_IMAGE_FULL_NAME}"
+
+
+    - name: Build Docker image
+      id: build_docker_image
+      shell: bash
+      run: >
+        docker build
+        --tag "ghcr.io/${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
+        --build-arg BUILD_VERSION="${{ inputs.planned_version }}"
+        --file Dockerfile
+        .
+
+
+    - name: Push Docker image to registry
+      id: push_docker_image
+      shell: bash
+      run: |
+        docker push "ghcr.io/${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
+
+
+...
