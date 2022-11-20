@@ -47,13 +47,13 @@ jobs:
 
       - name: Build Docker image
         id: build_docker_image
-        uses: reinvented-stuff/build-docker-image-action@master
+        uses: reinvented-stuff/build-docker-image-action@v2.0.0
         with:
           registry_address: "ghcr.io"
           registry_username: "${{ github.actor }}"
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
           name: "${{ github.repository }}/${{ env.APP_NAME }}"
-          planned_version: "${{ env.PLANNED_VERSION }}"
+          planned_version: "1.0.0"
 
 ...
 
