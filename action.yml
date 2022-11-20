@@ -102,9 +102,21 @@ runs:
       id: set_docker_build_args
       shell: bash
       run: |
+        BUILD_ARGS_COMPILED=( )
+
         if [[ ! -z "${{ inputs.build_args }}" ]]; then
-          echo -e "${{ inputs.build_args }}"
+
+          while read build_arg; do
+
+            echo "Processing build_arg: '${build_arg}'"
+            BUILD_ARGS_COMPILED+=( "--build_arg" "'${build_arg}'" )
+
+          done <<< "${{ inputs.build_args }}"
+
         fi
+
+        echo "::set-output name=build_args_compiled::${BUILD_ARGS_COMPILED[@]}"
+
 
     - name: Build Docker image
       id: build_docker_image
@@ -113,6 +125,7 @@ runs:
         docker build
         --tag "${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
         --build-arg BUILD_VERSION="${{ inputs.planned_version }}"
+        ${{ steps.set_docker_build_args.outputs.build_args_compiled }}
         --file Dockerfile
         .
 
