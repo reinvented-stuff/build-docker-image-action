@@ -6,24 +6,47 @@ description: Builds a Docker image and pushes it into a registry
 
 
 inputs:
-  github_token:
-    description: 'Pass the secrets.GITHUB_TOKEN variable'
+  registry_address:
+    description: 'Docker registry address'
+    type: string
+    required: true
+
+  registry_username:
+    description: 'Username to authorise in registry'
+    type: string
+    required: true
+
+  registry_token:
+    description: 'Token to authorise in registry'
     type: string
     required: true
 
   name:
-    description: 'Name of the Docker image'
+    description: 'Name of the Docker image (incl. repository, excl. version)'
     type: string
     required: true
+
+  build_args:
+    description: 'Additional build arguments to pass to docker build command'
+    type: string
+    required: false
+    default: ""
 
   planned_version:
     description: 'Version to assign to the image'
     type: string
     required: true
 
+  default_branch:
+    description: 'Default branch name that would not be added to version tag part'
+    type: string
+    required: false
+    default: "master"
+
   fail_on_error:
     description: 'Fail the pipeline on error'
     type: boolean
+    required: true
     default: false
 
 
@@ -47,22 +70,26 @@ runs:
     - name: Login to Docker registry
       id: docker_registry_login
       shell: bash
-      run: |
-        echo "${{ inputs.github_token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      run: >-
+        echo "${{ inputs.registry_token }}" |
+        docker login
+        "${{ inputs.registry_address }}"
+        -u "${{ github.actor }}"
+        --password-stdin
 
 
     - name: Define Docker image ID and full name
       id: set_docker_image_id
       shell: bash
       run: |
-        if [[ "${{ steps.get_branch_name.outputs.branch_name }}" == "master" ]]; then
+        if [[ "${{ steps.get_branch_name.outputs.branch_name }}" == "${{ inputs.default_branch }}" ]]; then
           long_suffix=""
         else
           long_suffix="${{steps.get_branch_name.outputs.branch_name}}"
         fi
 
-        GITHUB_IMAGE_ID="$(echo "${{ github.repository }}/${{ inputs.name }}" | tr '[A-Z]' '[a-z]')"
-        GITHUB_IMAGE_FULL_NAME="ghcr.io/${GITHUB_IMAGE_ID}:${{ inputs.planned_version }}${long_suffix}"
+        GITHUB_IMAGE_ID="$(echo "${{ inputs.name }}" | tr '[A-Z]' '[a-z]')"
+        GITHUB_IMAGE_FULL_NAME="${{ inputs.registry_address }}/${GITHUB_IMAGE_ID}:${{ inputs.planned_version }}${long_suffix}"
 
         echo "::debug::GITHUB_IMAGE_ID: ${GITHUB_IMAGE_ID}"
         echo "::debug::GITHUB_IMAGE_FULL_NAME: ${GITHUB_IMAGE_FULL_NAME}"
@@ -70,6 +97,14 @@ runs:
         echo "::set-output name=github_image_id::${GITHUB_IMAGE_ID}"
         echo "::set-output name=github_image_full_name::${GITHUB_IMAGE_FULL_NAME}"
 
+
+    - name: Render Docker build arguments
+      id: set_docker_build_args
+      shell: bash
+      run: |
+        if [[ ! -z "${{ inputs.build_args }}" ]]; then
+          echo -e "${{ inputs.build_args }}"
+        fi
 
     - name: Build Docker image
       id: build_docker_image
