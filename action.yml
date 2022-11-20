@@ -108,6 +108,8 @@ runs:
 
           while read build_arg; do
 
+           [[ -z "${build_arg}" ]] && continue
+
             echo "Processing build_arg: '${build_arg}'"
             BUILD_ARGS_COMPILED+=( "--build_arg" "'${build_arg}'" )
 
