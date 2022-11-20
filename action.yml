@@ -111,7 +111,7 @@ runs:
            [[ -z "${build_arg}" ]] && continue
 
             echo "Processing build_arg: '${build_arg}'"
-            BUILD_ARGS_COMPILED+=( "--build_arg" "'${build_arg}'" )
+            BUILD_ARGS_COMPILED+=( "--build-arg" "'${build_arg}'" )
 
           done <<< "${{ inputs.build_args }}"
 
