@@ -32,6 +32,12 @@ inputs:
     required: false
     default: ""
 
+  working_directory:
+    description: 'Where to look for Dockerfile'
+    type: string
+    required: false
+    default: "./"
+
   planned_version:
     description: 'Version to assign to the image'
     type: string
@@ -123,6 +129,7 @@ runs:
     - name: Build Docker image
       id: build_docker_image
       shell: bash
+      working-directory: ${{ inputs.working_directory }}
       run: >
         docker build
         --tag "${{ steps.set_docker_image_id.outputs.github_image_full_name }}"

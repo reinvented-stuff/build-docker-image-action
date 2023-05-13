@@ -30,7 +30,7 @@ jobs:
 
       - name: Use latest released action
         id: validate_new_version
-        uses: reinvented-stuff/validate-version-action@master
+        uses: reinvented-stuff/validate-version-action@1.1.3
         with:
           version_filename: ".version"
           github_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -83,7 +83,7 @@ jobs:
 
       - name: Generate changelog
         id: generate_changelog
-        uses: reinvented-stuff/changelog-render-action@master
+        uses: reinvented-stuff/changelog-render-action@1.0.1
         with:
           long_changelog_export_filename: ".long_changelog.md"
           short_changelog_export_filename: ".short_changelog.md"
@@ -148,7 +148,7 @@ jobs:
 
 
       - name: Send out notification about release
-        uses: rest-gateway/notification-action@master
+        uses: rest-gateway/notification-action@1.0.9
         with:
           message: "Release ${{env.PLANNED_VERSION}} happened for <b>${{env.APP_NAME}}</b>. Yay."
           recipient: "${{ secrets.NOTIFICATIONS_DEFAULT_RECIPIENT }}"
