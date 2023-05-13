@@ -49,6 +49,12 @@ inputs:
     required: false
     default: "master"
 
+  skip_branch_suffix:
+    description: 'Overrides behaviour of "default_branch" parameter, forces to omit branch name in version tag'
+    type: boolean
+    required: false
+    default: false
+
   fail_on_error:
     description: 'Fail the pipeline on error'
     type: boolean
@@ -91,7 +97,11 @@ runs:
         if [[ "${{ steps.get_branch_name.outputs.branch_name }}" == "${{ inputs.default_branch }}" ]]; then
           long_suffix=""
         else
-          long_suffix="${{steps.get_branch_name.outputs.branch_name}}"
+          if [[ "${{ inputs.skip_branch_suffix }}" == "true" ]]; then
+            long_suffix=""
+          else
+            long_suffix="${{steps.get_branch_name.outputs.branch_name}}"
+          fi
         fi
 
         GITHUB_IMAGE_ID="$(echo "${{ inputs.name }}" | tr '[A-Z]' '[a-z]')"
