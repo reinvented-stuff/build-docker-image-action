@@ -12,6 +12,7 @@ Builds a Docker image and pushes it into a registry
 * `registry_token` - Token to authorise in registry
 * `name` - Name of the Docker image (incl. repository, excl. version)
 * `build_args` - Additional build arguments to pass to docker build command
+* `working_directory` - Where to look for Dockerfile
 * `planned_version` - Version to assign to the image
 * `default_branch` - Default branch name that would not be added to version tag part
 * `fail_on_error` - Fail the pipeline on error
