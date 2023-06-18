@@ -15,6 +15,7 @@ Builds a Docker image and pushes it into a registry
 * `working_directory` - Where to look for Dockerfile
 * `planned_version` - Version to assign to the image
 * `default_branch` - Default branch name that would not be added to version tag part
+* `skip_branch_suffix` - Skip branch name in the tag even if the branch isn't the default one
 * `fail_on_error` - Fail the pipeline on error
 
 ## Outputs
