@@ -56,6 +56,8 @@ jobs:
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
           name: "${{ github.repository }}/${{ env.APP_NAME }}"
           planned_version: "1.0.0"
+          build_args: |
+            NGINX_VERSION="1.6.12"
 
 ...
 

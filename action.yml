@@ -33,10 +33,16 @@ inputs:
     default: ""
 
   working_directory:
-    description: 'Where to look for Dockerfile'
+    description: 'Where to execute the build'
     type: string
     required: false
     default: "./"
+
+  dockerfile:
+    description: 'Where Dockerfile is located'
+    type: string
+    required: false
+    default: "Dockerfile"
 
   planned_version:
     description: 'Version to assign to the image'
@@ -145,7 +151,7 @@ runs:
         --tag "${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
         --build-arg BUILD_VERSION="${{ inputs.planned_version }}"
         ${{ steps.set_docker_build_args.outputs.build_args_compiled }}
-        --file Dockerfile
+        --file ${{ inputs.dockerfile }}
         .
 
 
