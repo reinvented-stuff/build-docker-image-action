@@ -32,6 +32,13 @@ inputs:
     required: false
     default: ""
 
+  platform:
+    description: 'Platform to set in the manifest'
+    type: string
+    required: false
+    default: ""
+
+
   working_directory:
     description: 'Where to execute the build'
     type: string
@@ -120,6 +127,17 @@ runs:
         echo "github_image_full_name=${GITHUB_IMAGE_FULL_NAME}" >> "${GITHUB_OUTPUT}"
 
 
+    - name: Render platform argument
+      id: set_platform_arg
+      shell: bash
+      run: |
+        if [[ ! -z "${{ inputs.platform }}" ]]; then
+          PLATFORM_ARG='--platform "${{ inputs.platform }}"'
+        fi
+
+        echo "platform_arg=${PLATFORM_ARG}" >> "${GITHUB_OUTPUT}"
+
+
     - name: Render Docker build arguments
       id: set_docker_build_args
       shell: bash
@@ -151,7 +169,8 @@ runs:
         --tag "${{ steps.set_docker_image_id.outputs.github_image_full_name }}"
         --build-arg BUILD_VERSION="${{ inputs.planned_version }}"
         ${{ steps.set_docker_build_args.outputs.build_args_compiled }}
-        --file ${{ inputs.dockerfile }}
+        ${{ steps.set_platform_arg.outputs.platform_arg }}
+        --file "${{ inputs.dockerfile }}"
         .
 
 
