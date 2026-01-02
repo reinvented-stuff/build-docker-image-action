@@ -38,6 +38,11 @@ inputs:
     required: false
     default: ""
 
+  target:
+    description: 'Multi-stage build target'
+    type: string
+    required: false
+    default: ""
 
   working_directory:
     description: 'Where to execute the build'
@@ -138,6 +143,17 @@ runs:
         echo "platform_arg=${PLATFORM_ARG}" >> "${GITHUB_OUTPUT}"
 
 
+    - name: Render target argument
+      id: set_target_arg
+      shell: bash
+      run: |
+        if [[ ! -z "${{ inputs.target }}" ]]; then
+          TARGET_ARG='--target "${{ inputs.target }}"'
+        fi
+
+        echo "target_arg=${TARGET_ARG}" >> "${GITHUB_OUTPUT}"
+
+
     - name: Render Docker build arguments
       id: set_docker_build_args
       shell: bash
@@ -170,6 +186,7 @@ runs:
         --build-arg BUILD_VERSION="${{ inputs.planned_version }}"
         ${{ steps.set_docker_build_args.outputs.build_args_compiled }}
         ${{ steps.set_platform_arg.outputs.platform_arg }}
+        ${{ steps.set_target_arg.outputs.target_arg }}
         --file "${{ inputs.dockerfile }}"
         .
 
